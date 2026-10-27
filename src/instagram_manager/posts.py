@@ -14,27 +14,12 @@ class PostDownloader:
             return
         try:
             app_logger.info(f"Querying post archives for profile identifier: {target_username}")
+            
+            # ফিক্সড লজিক: limit যদি ০ (স্টার থেকে রূপান্তরিত) হয়, তবে এটি প্রোফাইলের সব পোস্ট নামিয়ে আনবে।
             medias = self.engine.cl.user_medias(user_id, amount=limit)
+            
             dest_folder = ensure_user_directory("downloads", target_username)
             for media in medias:
                 self._process_media(media, target_username, dest_folder)
         except Exception as e:
             app_logger.error(f"Failed parsing post streams: {e}")
-
-    def _process_media(self, media: Media, username: str, dest: Path) -> None:
-        shortcode = media.code
-        try:
-            if media.media_type == 1:
-                path = self.engine.cl.photo_download(media.pk, folder=dest)
-                self.engine.record_mgr.add_record(username, shortcode, "Photo", "Download", "SUCCESS", str(path))
-            elif media.media_type == 2:
-                if self.engine.config.get("download_videos", True):
-                    path = self.engine.cl.video_download(media.pk, folder=dest)
-                    self.engine.record_mgr.add_record(username, shortcode, "Video", "Download", "SUCCESS", str(path))
-            elif media.media_type == 8:
-                paths = self.engine.cl.album_download(media.pk, folder=dest)
-                self.engine.record_mgr.add_record(username, shortcode, "Carousel", "Download", "SUCCESS", str(paths))
-            app_logger.info(f"Successfully processed post entity [{shortcode}]")
-        except Exception as e:
-            app_logger.error(f"Error handling post asset item reference [{shortcode}]: {e}")
-            self.engine.record_mgr.add_record(username, shortcode, "Post", "Download", "FAILED", error_msg=str(e))
