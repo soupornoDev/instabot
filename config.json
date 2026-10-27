@@ -1,0 +1,9 @@
+{
+    "download_posts": true,
+    "download_reels": true,
+    "download_stories": true,
+    "save_metadata": true,
+    "download_videos": true,
+    "download_thumbnails": false,
+    "comment_template": "Owo beautiful picture \ud83d\udc9d\ud83d\udc9d message sent from @{username}"
+}
